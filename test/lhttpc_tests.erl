@@ -25,7 +25,7 @@
 %%% ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 %%% ----------------------------------------------------------------------------
 
-%%% @author Oscar HellstrÃ¶m <oscar@hellstrom.st>
+%%% @author Oscar Hellström <oscar@hellstrom.st>
 -module(lhttpc_tests).
 
 -export([test_no/2]).
@@ -101,7 +101,6 @@ test_no(N, Tests) ->
 
 start_app() ->
     application:start(crypto),
-    application:start(asn1),
     application:start(public_key),
     ok = application:start(ssl),
     ok = lhttpc:start().

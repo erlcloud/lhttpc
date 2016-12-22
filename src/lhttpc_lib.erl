@@ -27,7 +27,7 @@
 
 %%------------------------------------------------------------------------------
 %%% @private
-%%% @author Oscar HellstrÃ¶m <oscar@hellstrom.st>
+%%% @author Oscar Hellström <oscar@hellstrom.st>
 %%% @doc
 %%% This module implements various library functions used in lhttpc.
 %%------------------------------------------------------------------------------
@@ -352,8 +352,6 @@ add_content_headers("POST", Hdrs, Body, PartialUpload) ->
 add_content_headers("PUT", Hdrs, Body, PartialUpload) ->
     add_content_headers(Hdrs, Body, PartialUpload);
 add_content_headers("PATCH", Hdrs, Body, PartialUpload) ->
-    add_content_headers(Hdrs, Body, PartialUpload);
-add_content_headers("DELETE", Hdrs, Body, PartialUpload) ->
     add_content_headers(Hdrs, Body, PartialUpload);
 add_content_headers(_, Hdrs, _, _PartialUpload) ->
     Hdrs.

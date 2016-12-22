@@ -27,7 +27,7 @@
 
 %%------------------------------------------------------------------------------
 %%% @private
-%%% @author Oscar HellstrÃ¶m <oscar@hellstrom.st>
+%%% @author Oscar Hellström <oscar@hellstrom.st>
 %%% @doc This module implements the HTTP request handling. This should normally
 %%% not be called directly since it should be spawned by the lhttpc module.
 %%% @end
