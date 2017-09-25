@@ -267,7 +267,13 @@ init(Options) ->
         true ->
             % Make sure that the ssl random number generator is seeded
             % This was new in R13 (ssl-3.10.1 in R13B vs. ssl-3.10.0 in R12B-5)
-            apply(ssl, seed, [crypto:rand_bytes(255)]);
+            RandBytes =
+                try
+                    crypto:strong_rand_bytes(255)
+                catch
+                    low_entropy -> list_to_binary(lists:map(fun(_) -> rand:uniform(256) - 1 end, lists:seq(1,255)))
+                end,
+            apply(ssl, seed, [RandBytes]);
         false ->
             ok
     end,
