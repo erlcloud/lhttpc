@@ -42,6 +42,14 @@
 -define(CONNECTION_HDR(HDRS, DEFAULT),
     string:to_lower(lhttpc_lib:header_value("connection", HDRS, DEFAULT))).
 
+-ifdef(OTP_RELEASE). %% this implies 21 or higher
+-define(EXCEPTION(Class, Reason, Stacktrace), Class:Reason:Stacktrace).
+-define(GET_STACK(Stacktrace), Stacktrace).
+-else.
+-define(EXCEPTION(Class, Reason, _), Class:Reason).
+-define(GET_STACK(_), erlang:get_stacktrace()).
+-endif.
+
 -record(client_state, {
         host :: string(),
         port = 80 :: port_num(),
@@ -96,9 +104,8 @@ request(From, Host, Port, Ssl, Path, Method, Hdrs, Body, Options) ->
             {response, self(), {error, Reason}};
         error:closed ->
             {response, self(), {error, connection_closed}};
-        Class:Reason when Class == error; Class == exit ->
-            Stack = erlang:get_stacktrace(),
-            {response, self(), {error, {Reason, Stack}}}
+        ?EXCEPTION(Class, Reason, Stacktrace) when Class == error; Class == exit ->
+            {response, self(), {error, {Reason, ?GET_STACK(Stacktrace)}}}
     end,
     case Result of
         {response, _, {ok, {no_return, _}}} -> ok;
@@ -223,9 +230,9 @@ send_request(#client_state{socket = undefined} = State) ->
     catch
         exit:{{{badmatch, {error, {asn1, _}}}, _}, _} ->
             throw(ssl_decode_error);
-        Type:Error ->
+        ?EXCEPTION(Type, Error, Stacktrace) ->
                     error_logger:error_msg("Socket connection error: ~p ~p, ~p",
-                                           [Type, Error, erlang:get_stacktrace()])
+                                           [Type, Error, ?GET_STACK(Stacktrace)])
     end;
 send_request(#client_state{proxy = #lhttpc_url{}, proxy_setup = false} = State) ->
 % use a proxy.
