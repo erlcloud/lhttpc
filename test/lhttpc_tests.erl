@@ -729,7 +729,7 @@ close_connection() ->
 ssl_get() ->
     Port = start(ssl, [fun simple_response/5]),
     URL = ssl_url(Port, "/simple"),
-    {ok, Response} = lhttpc:request(URL, "GET", [], 1000),
+    {ok, Response} = lhttpc:request(URL, "GET", [], [], 1000, [{connect_options, [{verify, verify_none}]}]),
     ?assertEqual({200, "OK"}, status(Response)),
     ?assertEqual(<<?DEFAULT_STRING>>, body(Response)).
 
@@ -740,7 +740,7 @@ ssl_get_ipv6() ->
             ?debugMsg("WARNING: impossible to test IPv6 support~n");
         Port when is_number(Port) ->
             URL = ssl_url(inet6, Port, "/simple"),
-            {ok, Response} = lhttpc:request(URL, "GET", [], 1000),
+            {ok, Response} = lhttpc:request(URL, "GET", [], [], 1000, [{connect_options, [{verify, verify_none}]}]),
             ?assertEqual({200, "OK"}, status(Response)),
             ?assertEqual(<<?DEFAULT_STRING>>, body(Response))
     end.
@@ -750,21 +750,21 @@ ssl_post() ->
     URL = ssl_url(Port, "/simple"),
     Body = "SSL Test <o/",
     BinaryBody = list_to_binary(Body),
-    {ok, Response} = lhttpc:request(URL, "POST", [], Body, 1000),
+    {ok, Response} = lhttpc:request(URL, "POST", [], Body, 1000, [{connect_options, [{verify, verify_none}]}]),
     ?assertEqual({200, "OK"}, status(Response)),
     ?assertEqual(BinaryBody, body(Response)).
 
 ssl_chunked() ->
     Port = start(ssl, [fun chunked_response/5, fun chunked_response_t/5]),
     URL = ssl_url(Port, "/ssl_chunked"),
-    FirstResult = lhttpc:request(URL, get, [], 100),
+    FirstResult = lhttpc:request(URL, get, [], [], 100, [{connect_options, [{verify, verify_none}]}]),
     ?assertMatch({ok, _}, FirstResult),
     {ok, FirstResponse} = FirstResult,
     ?assertEqual({200, "OK"}, status(FirstResponse)),
     ?assertEqual(<<?DEFAULT_STRING>>, body(FirstResponse)),
     ?assertEqual("chunked", lhttpc_lib:header_value("transfer-encoding",
             headers(FirstResponse))),
-    SecondResult = lhttpc:request(URL, get, [], 100),
+    SecondResult = lhttpc:request(URL, get, [], [], 100, [{connect_options, [{verify, verify_none}]}]),
     {ok, SecondResponse} = SecondResult,
     ?assertEqual({200, "OK"}, status(SecondResponse)),
     ?assertEqual(<<"Again, great success!">>, body(SecondResponse)),

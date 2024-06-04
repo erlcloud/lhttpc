@@ -121,9 +121,9 @@ listen(ssl, Addr, Family) ->
         binary,
         {active, false},
         {ip, Addr},
-        {verify,0},
-        {keyfile, "../test/key.pem"},
-        {certfile, "../test/crt.pem"}
+        {verify, verify_none},
+        {keyfile, "test/key.pem"},
+        {certfile, "test/crt.pem"}
     ],
     {ok, LS} = ssl:listen(0, Opts),
     LS;
@@ -145,9 +145,18 @@ get_addr(Host, Family) ->
             {error, family_not_supported}
     end.
 
+% ssl:ssl_accept was deprecated in OTP 21
+-define(SSL_HANDSHAKE(SslSocket), {ssl:ssl_accept(SslSocket), SslSocket}).
+-ifdef(OTP_RELEASE).
+    -if(?OTP_RELEASE >= 21).
+        -undef(SSL_HANDSHAKE).
+        -define(SSL_HANDSHAKE(SslSocket), ssl:handshake(SslSocket)).
+    -endif.
+-endif.
+
 accept(ssl, ListenSocket) ->
-    {ok, Socket} = ssl:transport_accept(ListenSocket, 10000),
-    ok = ssl:ssl_accept(Socket),
+    {ok, SslSocket} = ssl:transport_accept(ListenSocket, 10000),
+    {ok, Socket} = ?SSL_HANDSHAKE(SslSocket),
     Socket;
 accept(Module, ListenSocket) ->
     {ok, Socket} = Module:accept(ListenSocket, 1000),
