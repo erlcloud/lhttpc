@@ -212,6 +212,17 @@ format_hdrs(Headers) ->
 %% Internal functions
 %%==============================================================================
 
+% http_uri:decode was deprecated in OTP 23
+-define(PCT_DECODE(X), http_uri:decode(X)).
+-ifdef (OTP_RELEASE).
+    -if(?OTP_RELEASE >= 24).
+        % uri_string:percent_decode is actually available in OTP 23.2, but
+        % there is no way to conditionally compile based on OTP minor version.
+        -undef(PCT_DECODE).
+        -define(PCT_DECODE(X), uri_string:percent_decode(X)).
+    -endif.
+-endif.
+
 %%------------------------------------------------------------------------------
 %% @private
 %% @doc
@@ -243,10 +254,10 @@ split_credentials(CredsHostPortPath) ->
             case string:tokens(Creds, ":") of
                 [User] ->
                     % RFC1738 says ":password" is optional
-                    {http_uri:decode(User), "",
+                    {?PCT_DECODE(User), "",
                      string:join([HostPort | Path], "/")};
                 [User, Passwd] ->
-                    {http_uri:decode(User), http_uri:decode(Passwd),
+                    {?PCT_DECODE(User), ?PCT_DECODE(Passwd),
                      string:join([HostPort | Path], "/")}
             end
     end.
