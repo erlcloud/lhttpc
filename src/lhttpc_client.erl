@@ -168,7 +168,8 @@ execute(From, Host, Port, Ssl, Path, Method, Hdrs0, Body, Options) ->
                 lists:ukeysort(1, UserSslOptions),
                 lists:ukeysort(1, DefSslOptions)
             ),
-            EffectiveSslOpts = add_cacerts(EffectiveSslOpts0),
+            EffectiveSslOpts1 = add_cacerts(EffectiveSslOpts0),
+            EffectiveSslOpts = add_default_pkix_verify_hostname_match_fun_https(EffectiveSslOpts1),
             EffectiveTcpOptions ++ EffectiveSslOpts;
         false ->
             EffectiveTcpOptions
@@ -993,4 +994,16 @@ add_cacerts(ConnOpts) ->
     end.
 -else.
 add_cacerts(ConnOpts) -> ConnOpts.
+-endif.
+
+-ifdef(hostname_match_fun_https).
+add_default_pkix_verify_hostname_match_fun_https(ConnOpts) ->
+    case proplists:get_value(customize_hostname_check, ConnOpts) of
+        undefined ->
+            [{customize_hostname_check, [{match_fun, public_key:pkix_verify_hostname_match_fun(https)}]} | ConnOpts];
+        _ ->
+            ConnOpts
+    end.
+-else.
+add_default_pkix_verify_hostname_match_fun_https(ConnOpts) -> ConnOpts.
 -endif.
