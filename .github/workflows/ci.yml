@@ -15,7 +15,7 @@ jobs:
       image: erlang:${{matrix.otp_vsn}}
     strategy:
       matrix:
-        otp_vsn: [24, 26]
+        otp_vsn: [24, 25, 26, 27]
         os: [ubuntu]
     steps:
       - uses: actions/checkout@v4
